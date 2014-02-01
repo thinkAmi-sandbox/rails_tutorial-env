@@ -1,0 +1,54 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Uncomment these lines (and the ones in the generated Gemfile) if you want
+# to live on the Edge:
+#
+Vagrant.require_plugin "vagrant-berkshelf"
+Vagrant.require_plugin "vagrant-omnibus"
+
+Vagrant.configure("2") do |config|
+  config.vm.hostname = "railstutorial-4.0"
+
+  config.omnibus.chef_version = :latest
+
+  config.vm.box = "ubuntu120403"
+  #config.vm.box_url = "https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_provisionerless.box"
+
+  config.vm.network :private_network, ip: "33.33.33.10"
+
+  config.vm.provider :virtualbox do |vb|
+    vb.gui = true
+  end
+
+  config.berkshelf.enabled = true
+
+  config.vm.provision :chef_solo do |chef|
+    chef.json = {
+      rbenv: {
+        user_installs: [{
+          user: "vagrant",
+          rubies: ["2.0.0-p353"],
+          global: "2.0.0-p353",
+          gems: {
+            "2.0.0-p353" => [
+              { name: "rails",
+                version: "4.0.2"
+              }
+            ]
+          }
+        }]
+      }
+    }
+
+    chef.run_list = [
+      "apt",
+      "git",
+      "rails_tutorial-env_4_0",
+      "ruby_build",
+      "rbenv::user",
+      "sublime-text"
+    ]
+  end
+
+end
